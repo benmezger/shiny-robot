@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% from "_formhelpers.html" import render_field %}
+
+{% block content %}
+<div class="col-md-5 col-md-offset-5">
+    <form class="form form-horizontal" method="post" role="form">
+	{% for field in form %}
+	    <tr>
+	    {% if field.type == "BooleanField" %}
+		<td></td>
+		<td>{{ render_field(field) }}</td>
+	    {% else %}
+		<td>{{ render_field(field) }}</td>
+	    {% endif %}
+	    </tr>
+	{% endfor %}
+        <input type="submit" value="Submit">
+    </form>
+</div>
+
+{% endblock %}
