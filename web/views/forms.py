@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import socket
 import os
 
@@ -15,12 +16,12 @@ class ServiceForm(Form): # TODO: Fix validation, make sure at least one if requi
     idp = BooleanField("IDP")
 
 class NetworkForm(Form):
-    ip = StringField("Endereco IP", default=socket.gethostbyname(
+    ip = StringField(u"Endereço IP", default=socket.gethostbyname(
         socket.gethostname()), validators=[validators.IPAddress(),
             validators.Required()])
-    domain = StringField("Dominio", default=socket.getfqdn(),
+    domain = StringField(u"Domínio", default=socket.getfqdn(),
             validators=[validators.Required()]) # TODO, split
-    hostname = StringField("Hostname", default=socket.gethostname(),
+    hostname = StringField(u"Hostname", default=socket.gethostname(),
             validators=[validators.Required()])
     # gateway = ..
     # dns = ...
@@ -29,7 +30,8 @@ class NetworkForm(Form):
 class IDPForm(NetworkForm):
     port = SelectMultipleField("Porta", validators=[validators.Required()],
             choices=[(443, 443), (80, 80)], coerce=int)
-    institution_name = StringField(validators.required())
+    institution_name = StringField(u"Nome da instituição", validators=[
+        validators.Required()])
 
 class SPForm(Form):
     pass
