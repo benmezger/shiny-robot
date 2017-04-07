@@ -8,7 +8,7 @@
   {% if messages %}
     <ul class=flashes>
     {% for message in messages %}
-      <li>{{ message }}</li>
+      <li>{{ message.decode('utf-8') }}</li>
     {% endfor %}
     </ul>
   {% endif %}
