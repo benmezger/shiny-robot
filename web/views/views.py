@@ -112,4 +112,6 @@ def LDAPView(CustomView):
             session['data']['ldap'] = form.data
             return self.next_view()
 
+class ProcessView(CustomView):
+    pass
 
