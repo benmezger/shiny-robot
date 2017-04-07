@@ -11,6 +11,7 @@ from views.views import IDPView
 from views.views import SPView
 from views.views import LDAPView
 from views.views import ProcessView
+from views.views import SSHView
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
@@ -28,6 +29,7 @@ app.add_url_rule('/idp', view_func=IDPView.as_view("idpview", template_name="idp
 app.add_url_rule('/sp', view_func=SPView.as_view("spview", template_name="sp.html"))
 app.add_url_rule('/ldap', view_func=SPView.as_view("ldapview", template_name="ldap.html"))
 app.add_url_rule('/process', view_func=ProcessView.as_view("processview", template_name="process.html"))
+app.add_url_rule("/ssh", view_func=SSHView.as_view("sshview", template_name="ssh.html"))
 
 manager = Manager(app)
 
