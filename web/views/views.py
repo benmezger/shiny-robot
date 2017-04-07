@@ -123,7 +123,7 @@ class SSHView(CustomView):
         client = SSHClient()
         client.set_missing_host_key_policy(AutoAddPolicy())
         try:
-            client.connect(ip, port=port, username="seds", pkey=\
+            client.connect(ip, port=port, username="root", pkey=\
                     RSAKey.from_private_key(StringIO(priv_key)))
             return True
         except:
@@ -150,7 +150,7 @@ class SSHView(CustomView):
             tmp = ips.copy()
             for k, v in tmp.iteritems(): # TODO: refactor
                 if v:
-                    if self.test_ssh("localhost", \
+                    if self.test_ssh(v, \
                             session['ssh'].get("priv", "")):
                         ips.pop(k)
             if len(ips) == 0 or not all(ips.values()):
