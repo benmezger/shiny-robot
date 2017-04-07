@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <p>Coloque esta chave publica em <code>~/.ssh/authorized_keys</code>
+     para podermos acessar seu servidor e inicializar a instalação.</p>
+    <p>Observação: É necessario termos acesso <code>root</code> para a instalação.</p>
+    <pre>{{ key }}</pre>
+    <form class="form form-horizontal" method="post" role="form">
+        <input type="submit" value="Continuar">
+    </form>
+</div>
+{% endblock %}
