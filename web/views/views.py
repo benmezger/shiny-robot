@@ -12,6 +12,8 @@ def generate_rsa_key(bits=2048):
     return priv_key, pub_key
 
 class CustomView(View):
+    methods = ["GET", "POST"]
+
     def __init__(self, template_name):
         self.template_name = template_name
 
@@ -40,7 +42,6 @@ class CustomView(View):
         return "No views." # TODO: BUG?
 
 class ServiceView(CustomView):
-    methods = ["GET", "POST"]
 
     def dispatch_request(self):
         self.lock_session()
@@ -64,7 +65,6 @@ class ServiceView(CustomView):
             return redirect(url_for("serviceview")) # TODO: should we call render_template again?
 
 class IDPView(CustomView):
-    methods = ["GET", "POST"]
 
     def dispatch_request(self):
         if self.is_locked():
@@ -80,7 +80,6 @@ class IDPView(CustomView):
             return self.next_view()
 
 class SPView(CustomView):
-    methods = ["GET", "POST"]
 
     def dispatch_request(self):
         if self.is_locked():
@@ -96,7 +95,6 @@ class SPView(CustomView):
             return self.next_view()
 
 def LDAPView(CustomView):
-    methods = ["GET", "POST"]
 
     def dispatch_request(self):
         if self.is_locked():
