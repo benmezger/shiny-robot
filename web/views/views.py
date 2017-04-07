@@ -3,6 +3,13 @@
 from flask.views import View
 from flask import render_template, request, session, redirect, url_for, flash
 from forms import NetworkForm, SSLForm, SPForm, ServiceForm, IDPForm, LDAPForm
+from Crypto.PublicKey import RSA
+
+def generate_rsa_key(bits=2048):
+    key = RSA.generate(bits, e=65537)
+    pub_key = key.publickey().exportKey("PEM")
+    priv_key = key.exportKey("PEM")
+    return priv_key, pub_key
 
 class CustomView(View):
     def __init__(self, template_name):
