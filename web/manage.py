@@ -20,7 +20,7 @@ nav = Nav()
 
 @nav.navigation()
 def global_nav():
-    return Navbar("Gidlab", View("Configuracao de servico", "serviceview"))
+    return Navbar("Gidlab", View("Configuração de Serviços", "serviceview"))
 
 nav.init_app(app)
 
