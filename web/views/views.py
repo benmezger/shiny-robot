@@ -105,6 +105,7 @@ class IDPView(CustomView):
             tmp['idp'] = form.data
             session['data'] = tmp
             return self.next_view()
+        return self.render_template({"form": form})
 
 class SPView(CustomView):
 
