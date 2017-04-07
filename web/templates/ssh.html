@@ -5,6 +5,11 @@
     <p>Coloque esta chave publica em <code>~/.ssh/authorized_keys</code>
      para podermos acessar seu servidor e inicializar a instalação.</p>
     <p>Observação: É necessario termos acesso <code>root</code> para a instalação.</p>
+    <dl>
+        {% for k, v in ips.iteritems() %}
+            <dt>{{ k }} {{ v }}</dt>
+        {% endfor %}
+    </dl>
     <pre>{{ key }}</pre>
     <form class="form form-horizontal" method="post" role="form">
         <input type="submit" value="Continuar">

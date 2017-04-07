@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from StringIO import StringIO
+import socket
 
 from flask.views import View
 from flask import render_template, request, session, redirect, url_for, flash
@@ -34,9 +35,32 @@ class CustomView(View):
     def is_locked(self):
         return session['locked'] == True
 
+    def __verifyhosts(self):
+        data = session['data'].copy()
+        for k, v in session['data'].iteritems():
+            if not v:
+                data.pop(k)
+        current_ip = socket.gethostbyname(socket.gethostname())
+
+        diff = {}
+        for k, v in data.iteritems():
+            for _k, _v in data.get(k, {}).iteritems():
+                if _k == "ip" and _v != current_ip:
+                    diff[k] = _v
+        if diff:
+            session['ssh_ips'] = diff
+            return redirect(url_for("sshview"))
+        else:
+            session['ssh_ips'] = diff
+        return redirect(url_for("processview"))
+
     def next_view(self):
+        try:
+            session['next_view']
+        except:
+            return redirect(url_for("serviceview"))
         if len(session['next_view']) == 0:
-            return "TODO" # TODO: redirect to ProcessView
+            return self.__verifyhosts()
         url = session["next_view"].popitem()[1]
         if url:
             self.unlock_session()
@@ -140,7 +164,7 @@ class SSHView(CustomView):
             else:
                 priv_key, pub_key = generate_rsa_key()
                 session['ssh'] = {"pub": pub_key, "priv": priv_key}
-            return self.render_template({"key": pub_key})
+            return self.render_template({"key": pub_key, "ips": session['ssh_ips']})
 
         if request.method == "POST":
             ips = {"ldap": None, "sp": None, "idp": None}
