@@ -9,7 +9,7 @@ from wtforms import BooleanField
 from wtforms import IntegerField
 from wtforms import validators
 
-class ServiceForm(Form):
+class ServiceForm(Form): # TODO: Fix validation, make sure at least one if required
     ldap = BooleanField("LDAP")
     sp = BooleanField("SP")
     idp = BooleanField("IDP")
@@ -28,7 +28,7 @@ class NetworkForm(Form):
 
 class IDPForm(NetworkForm):
     port = SelectMultipleField("Porta", validators=[validators.Required()],
-            choices=[(443, 443), (80, 80)])
+            choices=[(443, 443), (80, 80)], coerce=int)
     institution_name = StringField(validators.required())
 
 class SPForm(Form):
