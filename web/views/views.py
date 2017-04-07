@@ -122,7 +122,7 @@ class SPView(CustomView):
             session['data']['sp'] = form.data
             return self.next_view()
 
-def LDAPView(CustomView):
+class LDAPView(CustomView):
 
     def dispatch_request(self):
         if self.is_locked():
@@ -131,13 +131,14 @@ def LDAPView(CustomView):
 
         form = LDAPForm(request.form)
         if request.method == "GET":
-            context = {"form", form}
+            context = {"form": form}
             return self.render_template(context)
         if request.method == "POST" and form.validate():
             tmp = session['data']
             tmp['ldap'] = form.data
             session['data'] = tmp
             return self.next_view()
+        return self.render_template({"form": form})
 
 class ProcessView(CustomView):
     pass
