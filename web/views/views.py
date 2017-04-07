@@ -177,11 +177,12 @@ class SSHView(CustomView):
                     if self.test_ssh(v, \
                             session['ssh'].get("priv", "")):
                         ips.pop(k)
-            if len(ips) == 0 or not all(ips.values()):
+            if len(ips) == 0 and not all(ips.values()):
                 return redirect(url_for("processview"))
             else:
                 for k, v in ips.iteritems():
                     if v:
                         flash("Erro ao acessar o %s no IP %s" % (k, v))
-                return self.render_template({"key": session['ssh'].get("pub")})
+                return self.render_template({"key": session['ssh'].get("pub"),
+                    "ips": session['ssh_ips']})
 
