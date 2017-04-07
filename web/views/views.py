@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
+from StringIO import StringIO
 
 from flask.views import View
 from flask import render_template, request, session, redirect, url_for, flash
 from forms import NetworkForm, SSLForm, SPForm, ServiceForm, IDPForm, LDAPForm
 from Crypto.PublicKey import RSA
+from paramiko import SSHClient, AutoAddPolicy, RSAKey
 
 def generate_rsa_key(bits=2048):
     key = RSA.generate(bits, e=65537)
-    pub_key = key.publickey().exportKey("PEM")
-    priv_key = key.exportKey("PEM")
+    pub_key = key.publickey().exportKey("OpenSSH")
+    priv_key = key.exportKey("OpenSSH")
     return priv_key, pub_key
 
 class CustomView(View):
@@ -51,7 +53,6 @@ class ServiceView(CustomView):
             context = {"form": form}
             return self.render_template(context)
         if request.method == "POST" and form.validate():
-            print "IS VALID"
             views = {"sp": "spview", "idp": "idpview", "ldap": "ldapview"}
             for k, v in form.data.iteritems():
                 if not v:
@@ -76,7 +77,9 @@ class IDPView(CustomView):
             context = {"form": form}
             return self.render_template(context)
         if request.method == "POST" and form.validate():
-            session['data']['idp'] = form.data
+            tmp = session['data']
+            tmp['idp'] = form.data
+            session['data'] = tmp
             return self.next_view()
 
 class SPView(CustomView):
@@ -106,9 +109,55 @@ def LDAPView(CustomView):
             context = {"form", form}
             return self.render_template(context)
         if request.method == "POST" and form.validate():
-            session['data']['ldap'] = form.data
+            tmp = session['data']
+            tmp['ldap'] = form.data
+            session['data'] = tmp
             return self.next_view()
 
 class ProcessView(CustomView):
     pass
+
+class SSHView(CustomView):
+
+    def test_ssh(self, ip, priv_key, port=22):
+        client = SSHClient()
+        client.set_missing_host_key_policy(AutoAddPolicy())
+        try:
+            client.connect(ip, port=port, username="seds", pkey=\
+                    RSAKey.from_private_key(StringIO(priv_key)))
+            return True
+        except:
+            return False
+
+    def dispatch_request(self):
+        if self.is_locked():
+            flash("Não autorizado.")
+            return redirect(url_for("serviceview"))
+        if request.method == "GET":
+            if session['ssh']:
+                priv_key = session['ssh'].get("priv")
+                pub_key = session['ssh'].get("pub")
+            else:
+                priv_key, pub_key = generate_rsa_key()
+                session['ssh'] = {"pub": pub_key, "priv": priv_key}
+            return self.render_template({"key": pub_key})
+
+        if request.method == "POST":
+            ips = {"ldap": None, "sp": None, "idp": None}
+            for k, v in session['data'].iteritems():
+                if k in ips.keys() and session['data'].get(k, None):
+                    ips[k] = session['data'].get(k).get("ip", None)
+            tmp = ips.copy()
+            for k, v in tmp.iteritems(): # TODO: refactor
+                if v:
+                    if self.test_ssh("localhost", \
+                            session['ssh'].get("priv", "")):
+                        ips.pop(k)
+            if len(ips) == 0 or not all(ips.values()):
+                return redirect(url_for("processview"))
+            else:
+                for k, v in ips.iteritems():
+                    if v:
+                        flash("Erro ao acessar o %s no IP %s" % (k, v))
+                return self.render_template({"key": session['ssh'].get("pub")})
 
