@@ -31,15 +31,13 @@ class CustomView(View):
         return session['locked'] == True
 
     def next_view(self):
-        try:
-            url = session["next_views"].popitem()[1]
-        except KeyError:
-            flash("Selecione pelo menos uma opção.")
-            return redirect(url_for("serviceview"))
+        if len(session['next_view']) == 0:
+            return "TODO" # TODO: redirect to ProcessView
+        url = session["next_view"].popitem()[1]
         if url:
             self.unlock_session()
             return redirect(url_for(url))
-        return "No views." # TODO
+        return "No views." # TODO: BUG?
 
 class ServiceView(CustomView):
     methods = ["GET", "POST"]
@@ -52,14 +50,18 @@ class ServiceView(CustomView):
             context = {"form": form}
             return self.render_template(context)
         if request.method == "POST" and form.validate():
+            print "IS VALID"
             views = {"sp": "spview", "idp": "idpview", "ldap": "ldapview"}
             for k, v in form.data.iteritems():
                 if not v:
                     views[k] = False
 
             session['data'] = {k: None for k in views.keys()}
-            session['next_views'] =  {k: v for (k, v) in views.iteritems() if v}
+            session['next_view'] =  {k: v for (k, v) in views.iteritems() if v}
             return self.next_view()
+        else:
+            flash("Selecione pelo menos uma opção.")
+            return redirect(url_for("serviceview")) # TODO: should we call render_template again?
 
 class IDPView(CustomView):
     methods = ["GET", "POST"]
@@ -69,7 +71,6 @@ class IDPView(CustomView):
             flash("Não autorizado.")
             return redirect(url_for("serviceview"))
 
-        self.unlock_session()
         form = IDPForm(request.form)
         if request.method == "GET":
             context = {"form": form}
@@ -86,7 +87,6 @@ class SPView(CustomView):
             flash("Não autorizado.")
             return redirect(url_for("serviceview"))
 
-        self.unlock_session()
         form = SPForm(request.form)
         if request.method == "GET":
             context = {"form": form}
@@ -103,9 +103,8 @@ def LDAPView(CustomView):
             flash("Não autorizado.")
             return redirect(url_for("serviceview"))
 
-        self.unlock_session()
         form = LDAPForm(request.form)
-        if request.metho == "GET":
+        if request.method == "GET":
             context = {"form", form}
             return self.render_template(context)
         if request.method == "POST" and form.validate():
