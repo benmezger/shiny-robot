@@ -1,0 +1,4 @@
+[submodule "docker-shibboleth"]
+	path = docker-shibboleth
+	url = https://github.com/benmezger/docker-shibboleth.git
+	branch = dynamic
