@@ -37,24 +37,24 @@ class CustomView(View):
     def is_locked(self):
         return session['locked'] == True
 
-    def __verifyhosts(self):
-        data = session['data'].copy()
-        for k, v in session['data'].iteritems():
-            if not v:
-                data.pop(k)
-        current_ip = socket.gethostbyname(socket.gethostname())
-
-        diff = {}
-        for k, v in data.iteritems():
-            for _k, _v in data.get(k, {}).iteritems():
-                if _k == "ip" and _v != current_ip:
-                    diff[k] = _v
-        if diff:
-            session['ssh_ips'] = diff
-            return redirect(url_for("sshview"))
-        else:
-            session['ssh_ips'] = diff
-        return redirect(url_for("processview"))
+#     def __verifyhosts(self):
+#         data = session['data'].copy()
+#         for k, v in session['data'].iteritems():
+#             if not v:
+#                 data.pop(k)
+#         current_ip = socket.gethostbyname(socket.gethostname())
+#
+#         diff = {}
+#         for k, v in data.iteritems():
+#             for _k, _v in data.get(k, {}).iteritems():
+#                 if _k == "ip" and _v != current_ip:
+#                     diff[k] = _v
+#         if diff:
+#             session['ssh_ips'] = diff
+#             return redirect(url_for("sshview"))
+#         else:
+#             session['ssh_ips'] = diff
+#         return redirect(url_for("processview"))
 
     def next_view(self):
         try:
