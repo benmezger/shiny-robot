@@ -58,20 +58,22 @@ br_states = [ # this is temporary
         ('SE', u'Sergipe'),
         ('TO', u'Tocantins')]
 
+class TechnicalDetails(Form):
+    technical_name = StringField(u"Nome do técnico", validators=[validators.Required()])
+    technical_email = EmailField(u"Email do técnico", validators=[validators.Required(),
+        validators.Email()])
+
 class CountryForm(Form):
     city = StringField(u"Cidade", validators=[validators.Required()])
     state = SelectField(u"Estado", choices=br_states, validators=[
         validators.Required()])
     organization_name = StringField(u"Nome da organização", validators=[
         validators.Required()])
-    technical_name = StringField(u"Nome do técnico", validators=[validators.Required()])
-    technical_email = EmailField(u"Email do técnico", validators=[validators.Required(),
-        validators.Email()])
     country = SelectField(u"País", choices=[("BR", "Brasil")], validators=[validators.Required()])
-    organization_initials = technical_name = StringField(u"Iniciais da organização",
+    organization_initials = StringField(u"Iniciais da organização",
             validators=[validators.Required()])
 
-class IDPForm(NetworkForm, CountryForm):
+class IDPForm(NetworkForm, CountryForm, TechnicalDetails):
     port = SelectMultipleField(u"Porta", validators=[validators.Required()],
             choices=[(443, 443), (80, 80)], coerce=int)
     institution_name = StringField(u"Nome da instituição", validators=[
@@ -103,5 +105,7 @@ class LDAPForm(NetworkForm, CountryForm):
             message=u"As senhas devem coincidir.")])
     confirm_ldap = PasswordField(u"Confirme sua senha.")
 
-class SSLForm(Form):
-    pass
+class SSLForm(CountryForm):
+    email = EmailField(u"Email", validators=[validators.Required(),
+        validators.Email()])
+    # TODO
