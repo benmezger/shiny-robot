@@ -4,6 +4,8 @@ import socket
 import os
 import subprocess
 import time
+import tempfile
+import shutil
 
 from flask.views import View
 from flask import Flask
@@ -12,6 +14,7 @@ from flask import render_template, request, session, redirect, url_for, flash
 from forms import NetworkForm, SSLForm, SPForm, ServiceForm, IDPForm, LDAPForm
 from Crypto.PublicKey import RSA
 from jinja2 import Environment, FileSystemLoader
+import git
 
 app = Flask(__name__)
 
@@ -23,10 +26,10 @@ app = Flask(__name__)
 #    priv_key = key.exportKey("OpenSSH")
 #    return priv_key, pub_key
 
-def config_replacer(filepath, **kwargs): # TODO, fix me
+def config_replacer(filepath, dir, **kwargs): # TODO, fix me
     # if not os.path.isfile(filepath) or not os.path.exists(filepath):
     #    return
-    env = Environment(loader=FileSystemLoader(CONFIG_DIR))
+    env = Environment(loader=FileSystemLoader(dir))
     template = env.get_template(filepath)
     out = template.render(**kwargs)
     return out
@@ -77,7 +80,7 @@ class CustomView(View):
         except:
             return redirect(url_for("serviceview"))
         if len(session['next_view']) == 0:
-            return self.__verifyhosts()
+            return redirect(url_for("processview"))
         url = session["next_view"].popitem()[1]
         if url:
             self.unlock_session()
@@ -114,6 +117,11 @@ class IDPView(CustomView):
             return redirect(url_for("serviceview"))
 
         form = IDPForm(request.form)
+        del form.organization_initials
+        del form.state
+        del form.organization_name
+        del form.city
+
         if request.method == "GET":
             context = {"form": form}
             return self.render_template(context)
@@ -121,6 +129,8 @@ class IDPView(CustomView):
             tmp = session['data']
             tmp['idp'] = form.data
             session['data'] = tmp
+            if not session['next_view'].has_key('ldap'):
+                session['next_view']['ldap'] = "ldapview"
             return self.next_view()
         return self.render_template({"form": form})
 
@@ -159,7 +169,50 @@ class LDAPView(CustomView):
 
 class ProcessView(CustomView):
 
+    def inject_docker(self, path, filename="Dockerfile", **kwargs):
+        out = config_replacer(filename, path, **kwargs)
+        with open(os.path.join(path, filename, "w")) as f:
+            f.write(out)
+
+    def inject_idp(self, path, conf_dir="conf/", **kwargs):
+        cpath = os.path.join(path, conf_dir)
+        for _ in os.listdir(cpath):
+            out = config_replacer(_, cpath, **kwargs)
+            with open(os.path.join(cpath, _), "w") as f:
+                f.write(out)
+
+    def generate_config(self):
+        data = session.get("data", {})
+        if data:
+            s = data['idp']['domain']
+            data['idp']['scope'] = s.split(".")[1:] # ignore hostname
+        conf_path = git.Repo(__file__, search_parent_directories=True)
+        conf_path = conf_path.git.rev_parse("--show-toplevel")
+        conf_path = os.path.join(conf_path, "docker-shibboleth")
+
+        tmp_root_dir = tempfile.mkdtemp()
+        tmp_sub_dirs = {}
+
+        # create temp directory for each service
+        for k, v in data.iteritems():
+            if v: tmp_sub_dirs[k] = tempfile.mktemp(dir=temp_root_dir)
+
+        # copy config file to temp directories and inject them
+        for k, v in tmp_sub_dirs.iteritems():
+            p = os.path.join(conf_path, k)
+            shutil.copytree(p, v)
+            if k == "idp":
+                self.inject_idp(v, data.get("idp", {}))
+            else if k == "ldap":
+                pass # TODO
+
     def execute(self):
+        executable = "/usr/bin/local/docker-compose"
+        args = ("up", "--build", "-d")
+        path = git.Repo(__file__, search_parent_directories=True)
+        path = path.git.rev_parse("--show-toplevel")
+        path = os.path.join(path, "docker-shibboleth")
+
         proc = subprocess.Popen(['ping 8.8.8.8'], shell=True, stdout=\
                 subprocess.PIPE)
 
