@@ -7,6 +7,8 @@ import time
 import tempfile
 import shutil
 
+from robot import app
+
 from flask.views import View
 from flask import Flask
 from flask import Response, stream_with_context
@@ -15,8 +17,6 @@ from forms import NetworkForm, SSLForm, SPForm, ServiceForm, IDPForm, LDAPForm
 from Crypto.PublicKey import RSA
 from jinja2 import Environment, FileSystemLoader
 import git
-
-app = Flask(__name__)
 
 # from paramiko import SSHClient, AutoAddPolicy, RSAKey
 
@@ -203,7 +203,7 @@ class ProcessView(CustomView):
             shutil.copytree(p, v)
             if k == "idp":
                 self.inject_idp(v, data.get("idp", {}))
-            else if k == "ldap":
+            elif k == "ldap":
                 pass # TODO
 
     def execute(self):

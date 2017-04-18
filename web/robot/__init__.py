@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*
 import os
 
+from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask_nav import Nav
 from flask_nav.elements import Navbar, View
 
-from views import app
+app = Flask(__name__)
+
 from views import ServiceView
 from views import IDPView
 from views import SPView

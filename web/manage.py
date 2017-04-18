@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*
 import os
 from flask_script import Manager
-from robot.views import app
+from robot import app
 
 manager = Manager(app)
 
