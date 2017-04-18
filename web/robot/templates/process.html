@@ -2,6 +2,12 @@
 
 {% block content %}
 <div class="container">
-    <pre>{{ output }}</pre>
+    <div style="overflow: auto;  height:700px;">
+    <pre>
+    {% for out in output %}
+        {{ out }}
+    {% endfor %}
+    </pre>
+    </div>
 </div>
 {% endblock %}
