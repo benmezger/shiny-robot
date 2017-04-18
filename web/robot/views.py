@@ -1,12 +1,19 @@
 # -*- coding: utf-8 -*-
 from StringIO import StringIO
 import socket
+import os
+import subprocess
+import time
 
 from flask.views import View
+from flask import Flask
+from flask import Response, stream_with_context
 from flask import render_template, request, session, redirect, url_for, flash
 from forms import NetworkForm, SSLForm, SPForm, ServiceForm, IDPForm, LDAPForm
 from Crypto.PublicKey import RSA
 from jinja2 import Environment, FileSystemLoader
+
+app = Flask(__name__)
 
 # from paramiko import SSHClient, AutoAddPolicy, RSAKey
 
@@ -15,6 +22,14 @@ from jinja2 import Environment, FileSystemLoader
 #    pub_key = key.publickey().exportKey("OpenSSH")
 #    priv_key = key.exportKey("OpenSSH")
 #    return priv_key, pub_key
+
+def config_replacer(filepath, **kwargs): # TODO, fix me
+    # if not os.path.isfile(filepath) or not os.path.exists(filepath):
+    #    return
+    env = Environment(loader=FileSystemLoader(CONFIG_DIR))
+    template = env.get_template(filepath)
+    out = template.render(**kwargs)
+    return out
 
 class CustomView(View):
     methods = ["GET", "POST"]
@@ -143,7 +158,27 @@ class LDAPView(CustomView):
         return self.render_template({"form": form})
 
 class ProcessView(CustomView):
-    pass
+
+    def execute(self):
+        proc = subprocess.Popen(['ping 8.8.8.8'], shell=True, stdout=\
+                subprocess.PIPE)
+
+        for line in iter(proc.stdout.readline, ''):
+            time.sleep(1)
+            yield line.rstrip()
+
+    def stream_template(self, **context):
+        app.update_template_context(context)
+        t = app.jinja_env.get_template(self.get_template_name())
+        rv = t.stream(context)
+        rv.disable_buffering()
+        return rv
+
+    def dispatch_request(self):
+        # if self.is_locked():
+        #    flash("Não autorizado.")
+        #    return redirect(url_for("serviceview"))
+        return Response(self.stream_template(output=stream_with_context(self.execute())))
 
 # class SSHView(CustomView):
 #
