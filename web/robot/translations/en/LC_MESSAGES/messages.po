@@ -1,0 +1,93 @@
+# English translations for .
+# Copyright (C) 2017 ORGANIZATION
+# This file is distributed under the same license as the  project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version:  v1.0\n"
+"Report-Msgid-Bugs-To: me (at) benmezger (dot) nl\n"
+"POT-Creation-Date: 2017-04-18 14:40-0300\n"
+"PO-Revision-Date: 2017-04-18 13:49-0300\n"
+"Last-Translator: Ben Mezger <me (at) benmezger (dot) nl>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.4.0\n"
+
+#: robot/templates/base.html:2
+msgid "Configurações automatizada"
+msgstr "Automatic configuration"
+
+#~ msgid "Endereço IP"
+#~ msgstr "IP Address"
+
+#~ msgid "Domínio"
+#~ msgstr "Domain"
+
+#~ msgid "Hostname"
+#~ msgstr "Hostname"
+
+#~ msgid "Mascara"
+#~ msgstr "Netmask"
+
+#~ msgid "Nome do técnico"
+#~ msgstr "Technician's name"
+
+#~ msgid "Email do técnico"
+#~ msgstr "Technician's email"
+
+#~ msgid "Cidade"
+#~ msgstr "City"
+
+#~ msgid "Estado"
+#~ msgstr "State"
+
+#~ msgid "Nome da organização"
+#~ msgstr "Organization's name"
+
+#~ msgid "País"
+#~ msgstr "Country"
+
+#~ msgid "Iniciais da organização"
+#~ msgstr "Organization initials"
+
+#~ msgid "Porta"
+#~ msgstr "Port"
+
+#~ msgid "Nome da instituição"
+#~ msgstr "Institution's name"
+
+#~ msgid "Senha para o keystore"
+#~ msgstr "Password for keystore"
+
+#~ msgid "As senhas devem coincidir."
+#~ msgstr "Password must match"
+
+#~ msgid "Confirme sua senha."
+#~ msgstr "Confirm your password"
+
+#~ msgid "Caminho da instalação"
+#~ msgstr "Install path"
+
+#~ msgid "URL LDAP"
+#~ msgstr "LDAP's URL"
+
+#~ msgid "DN de consulta"
+#~ msgstr "DN's query"
+
+#~ msgid "DN de leitura"
+#~ msgstr "DN's reading"
+
+#~ msgid "Usar StartTLS"
+#~ msgstr "Use StartTLS"
+
+#~ msgid "Selecione pelo menos uma opção."
+#~ msgstr "Select at least one option"
+
+#~ msgid "Não autorizado."
+#~ msgstr "Not authorized."
+

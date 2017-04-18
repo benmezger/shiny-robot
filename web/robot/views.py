@@ -7,16 +7,24 @@ import time
 import tempfile
 import shutil
 
-from robot import app
+from robot import app, babel, LANGUAGES
 
 from flask.views import View
-from flask import Flask
+from flask import Flask, g
 from flask import Response, stream_with_context
 from flask import render_template, request, session, redirect, url_for, flash
 from forms import NetworkForm, SSLForm, SPForm, ServiceForm, IDPForm, LDAPForm
 from Crypto.PublicKey import RSA
 from jinja2 import Environment, FileSystemLoader
 import git
+
+@babel.localeselector
+def get_locale():
+    return request.accept_languages.best_match(LANGUAGES.keys())
+
+@app.before_request
+def before_request():
+    g.locale = get_locale()
 
 # from paramiko import SSHClient, AutoAddPolicy, RSAKey
 
@@ -106,14 +114,14 @@ class ServiceView(CustomView):
             session['next_view'] =  {k: v for (k, v) in views.iteritems() if v}
             return self.next_view()
         else:
-            flash("Selecione pelo menos uma opção.")
+            flash(lazy_gettext("Selecione pelo menos uma opção."))
             return redirect(url_for("serviceview")) # TODO: should we call render_template again?
 
 class IDPView(CustomView):
 
     def dispatch_request(self):
         if self.is_locked():
-            flash("Não autorizado.")
+            flash(lazy_gettext("Não autorizado."))
             return redirect(url_for("serviceview"))
 
         form = IDPForm(request.form)
@@ -138,7 +146,7 @@ class SPView(CustomView):
 
     def dispatch_request(self):
         if self.is_locked():
-            flash("Não autorizado.")
+            flash(lazy_gettext("Não autorizado."))
             return redirect(url_for("serviceview"))
 
         form = SPForm(request.form)
@@ -153,7 +161,7 @@ class LDAPView(CustomView):
 
     def dispatch_request(self):
         if self.is_locked():
-            flash("Não autorizado.")
+            flash(lazy_gettext("Não autorizado."))
             return redirect(url_for("serviceview"))
 
         form = LDAPForm(request.form)

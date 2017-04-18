@@ -2,6 +2,8 @@
 import socket
 import os
 
+
+from flask_babel import lazy_gettext
 from wtforms import Form
 from wtforms import ValidationError
 from wtforms import StringField
@@ -18,16 +20,16 @@ class ServiceForm(Form): # TODO: Fix validation, make sure at least one if requi
     idp = BooleanField("IDP")
 
 class NetworkForm(Form):
-    ip = StringField(u"Endereço IP", default=socket.gethostbyname(
+    ip = StringField(lazy_gettext(u"Endereço IP"), default=socket.gethostbyname(
         socket.gethostname()), validators=[validators.IPAddress(),
             validators.Required()])
-    domain = StringField(u"Domínio", default=socket.getfqdn(),
+    domain = StringField(lazy_gettext(u"Domínio"), default=socket.getfqdn(),
             validators=[validators.Required()]) # TODO, split
-    hostname = StringField(u"Hostname", default=socket.gethostname(),
+    hostname = StringField(lazy_gettext(u"Hostname"), default=socket.gethostname(),
             validators=[validators.Required()])
     gateway = StringField(u"Gateway", validators=[validators.Required()]) # TODO
     dns = StringField(u"DNS", validators=[validators.Required()]) # TODO
-    mask = StringField(u"Mascara", validators=[validators.Required()])
+    mask = StringField(lazy_gettext(u"Mascara"), validators=[validators.Required()])
 
 br_states = [ # this is temporary
         ('AC', u'Acre'),
@@ -59,51 +61,51 @@ br_states = [ # this is temporary
         ('TO', u'Tocantins')]
 
 class TechnicalDetails(Form):
-    technical_name = StringField(u"Nome do técnico", validators=[validators.Required()])
-    technical_email = EmailField(u"Email do técnico", validators=[validators.Required(),
+    technical_name = StringField(lazy_gettext(u"Nome do técnico"), validators=[validators.Required()])
+    technical_email = EmailField(lazy_gettext(u"Email do técnico"), validators=[validators.Required(),
         validators.Email()])
 
 class CountryForm(Form):
-    city = StringField(u"Cidade", validators=[validators.Required()])
-    state = SelectField(u"Estado", choices=br_states, validators=[
+    city = StringField(lazy_gettext(u"Cidade"), validators=[validators.Required()])
+    state = SelectField(lazy_gettext(u"Estado"), choices=br_states, validators=[
         validators.Required()])
-    organization_name = StringField(u"Nome da organização", validators=[
+    organization_name = StringField(lazy_gettext(u"Nome da organização"), validators=[
         validators.Required()])
-    country = SelectField(u"País", choices=[("BR", "Brasil")], validators=[validators.Required()])
-    organization_initials = StringField(u"Iniciais da organização",
+    country = SelectField(lazy_gettext(u"País"), choices=[("BR", "Brasil")], validators=[validators.Required()])
+    organization_initials = StringField(lazy_gettext(u"Iniciais da organização"),
             validators=[validators.Required()])
 
 class IDPForm(NetworkForm, CountryForm, TechnicalDetails):
-    port = SelectMultipleField(u"Porta", validators=[validators.Required()],
+    port = SelectMultipleField(lazy_gettext(u"Porta"), validators=[validators.Required()],
             choices=[(443, 443), (80, 80)], coerce=int)
-    institution_name = StringField(u"Nome da instituição", validators=[
+    institution_name = StringField(lazy_gettext(u"Nome da instituição"), validators=[
         validators.Required()])
-    keystore_pwd = PasswordField(u"Senha para o keystore", validators=[
-        validators.DataRequired(), validators.EqualTo("confirm", message=u"As senhas devem coincidir.")])
-    confirm = PasswordField(u"Confirme sua senha.")
+    keystore_pwd = PasswordField(lazy_gettext(u"Senha para o keystore"), validators=[
+        validators.DataRequired(), validators.EqualTo("confirm", message=lazy_gettext(u"As senhas devem coincidir."))])
+    confirm = PasswordField(lazy_gettext(u"Confirme sua senha."))
     # technical_email = EmailField(u"Email do técnico", validators=[validators.Required(),
     #     validators.Email()])
     # technical_name = StringField(u"Nome do técnico", validators=[validators.Required()])
-    install_path = StringField(u"Caminho da instalação", validators=[validators.Required()])
+    install_path = StringField(lazy_gettext(u"Caminho da instalação"), validators=[validators.Required()])
 
 class SPForm(Form):
     pass
 
 class LDAPForm(NetworkForm, CountryForm):
-    url = StringField(u"URL LDAP", validators=[validators.Required(),
+    url = StringField(lazy_gettext(u"URL LDAP"), validators=[validators.Required(),
         validators.URL()])
-    query_dn = StringField(u"DN de consulta", validators=[validators.Required()])
-    read_dn = StringField(u"DN de leitura", validators=[validators.Required()])
-    port = IntegerField(u"Porta", default=389, validators=[validators.Required()])
-    researcher_password = PasswordField(u"Senha para o keystore", validators=[
+    query_dn = StringField(lazy_gettext(u"DN de consulta"), validators=[validators.Required()])
+    read_dn = StringField(lazy_gettext(u"DN de leitura"), validators=[validators.Required()])
+    port = IntegerField(lazy_gettext(u"Porta"), default=389, validators=[validators.Required()])
+    researcher_password = PasswordField(lazy_gettext(u"Senha para o keystore"), validators=[
         validators.DataRequired(), validators.EqualTo("confirm",
-            message=u"As senhas devem coincidir.")])
-    confirm = PasswordField(u"Confirme sua senha.")
-    starttls = BooleanField(u"Usar StartTLS", validators=[validators.Required()])
-    ldap_password = PasswordField(u"Senha para o keystore", validators=[
+            message=lazy_gettext(u"As senhas devem coincidir."))])
+    confirm = PasswordField(lazy_gettext(u"Confirme sua senha."))
+    starttls = BooleanField(lazy_gettext(u"Usar StartTLS"), validators=[validators.Required()])
+    ldap_password = PasswordField(lazy_gettext(u"Senha para o keystore"), validators=[
         validators.DataRequired(), validators.EqualTo("confirm_ldap",
-            message=u"As senhas devem coincidir.")])
-    confirm_ldap = PasswordField(u"Confirme sua senha.")
+            message=lazy_gettext(u"As senhas devem coincidir."))])
+    confirm_ldap = PasswordField(lazy_gettext(u"Confirme sua senha."))
 
 class SSLForm(CountryForm):
     email = EmailField(u"Email", validators=[validators.Required(),

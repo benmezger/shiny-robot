@@ -2,11 +2,19 @@
 import os
 
 from flask import Flask
+from flask_babel import Babel
 from flask_bootstrap import Bootstrap
 from flask_nav import Nav
 from flask_nav.elements import Navbar, View
 
 app = Flask(__name__)
+
+LANGUAGES = {
+        "en": "English",
+        "pt": "Portuguese do Brasil",
+        }
+
+babel = Babel(app)
 
 from views import ServiceView
 from views import IDPView
@@ -16,6 +24,7 @@ from views import ProcessView
 
 app.secret_key = os.environ.get("SECRET_KEY")
 Bootstrap(app)
+
 nav = Nav()
 
 @nav.navigation()
