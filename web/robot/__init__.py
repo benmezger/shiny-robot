@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*
 import os
 
-from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask_nav import Nav
 from flask_nav.elements import Navbar, View
 
+from views import app
 from views import ServiceView
 from views import IDPView
 from views import SPView
 from views import LDAPView
 from views import ProcessView
 
-app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
 Bootstrap(app)
 nav = Nav()
