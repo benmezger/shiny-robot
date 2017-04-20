@@ -1,12 +1,13 @@
-ansible==2.2.2.0
 appdirs==1.4.3
 asn1crypto==0.22.0
+Babel==2.4.0
 cffi==1.10.0
 click==6.7
 cryptography==1.8.1
 dominate==2.3.1
 enum34==1.1.6
 Flask==0.12.1
+Flask-Babel==0.11.2
 Flask-Bootstrap==3.3.7.1
 flask-nav==0.6
 Flask-Script==2.0.5
@@ -23,6 +24,7 @@ pyasn1==0.2.3
 pycparser==2.17
 pycrypto==2.6.1
 pyparsing==2.2.0
+pytz==2017.2
 PyYAML==3.12
 six==1.10.0
 smmap2==2.0.1
