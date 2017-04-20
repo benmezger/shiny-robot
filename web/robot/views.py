@@ -6,6 +6,7 @@ import subprocess
 import time
 import tempfile
 import shutil
+import codecs
 
 from robot import app, babel, LANGUAGES
 
@@ -13,7 +14,8 @@ from flask.views import View
 from flask import Flask, g
 from flask import Response, stream_with_context
 from flask import render_template, request, session, redirect, url_for, flash
-from forms import NetworkForm, SSLForm, SPForm, ServiceForm, IDPForm, LDAPForm
+from forms import NetworkForm, SSLForm, SPForm, ServiceForm, IDPForm, LDAPForm, \
+        OptionalLPDAPForm
 from Crypto.PublicKey import RSA
 from jinja2 import Environment, FileSystemLoader
 import git
@@ -105,7 +107,7 @@ class ServiceView(CustomView):
             context = {"form": form}
             return self.render_template(context)
         if request.method == "POST" and form.validate():
-            views = {"sp": "spview", "idp": "idpview", "ldap": "ldapview"}
+            views = {"idp": "idpview", "ldap": "ldapview"}  #, "sp": "spview",}
             for k, v in form.data.iteritems():
                 if not v:
                     views[k] = False
@@ -129,7 +131,6 @@ class IDPView(CustomView):
         del form.state
         del form.organization_name
         del form.city
-
         if request.method == "GET":
             context = {"form": form}
             return self.render_template(context)
@@ -137,6 +138,8 @@ class IDPView(CustomView):
             tmp = session['data']
             tmp['idp'] = form.data
             session['data'] = tmp
+            if tmp['idp'].get("wants_ldap", False) == True:
+                redirect(url_for("ldapview"))
             if not session['next_view'].has_key('ldap'):
                 session['next_view']['ldap'] = "ldapview"
             return self.next_view()
@@ -159,18 +162,39 @@ class SPView(CustomView):
 
 class LDAPView(CustomView):
 
+    def convert_url_dc(self, url):
+        url = url.split(".")[1:]
+        dc_cov = ""
+        for _ in url:
+            dc_cov += "dc=%s" % _
+        return dc_cov
+
     def dispatch_request(self):
         if self.is_locked():
             flash(lazy_gettext("Não autorizado."))
             return redirect(url_for("serviceview"))
 
-        form = LDAPForm(request.form)
+        ses = session.get("data", {})
+        if ses.get("idp") and (ses.get("idp").get("wants_ldap", False) == True):
+            dc = True
+            form = LDAPForm(request.form)
+        elif ses.get("idp") and not (ses.get("idp").get("wants_ldap", False) \
+                == True):
+            dc = False
+            form = OptionalLPDAPForm(request.form)
+        else:
+            dc = True
+            form = LDAPForm(request.form)
+
         if request.method == "GET":
             context = {"form": form}
             return self.render_template(context)
         if request.method == "POST" and form.validate():
             tmp = session['data']
             tmp['ldap'] = form.data
+            if dc:
+                tmp['ldap']['dc'] = self.convert_url_dc(tmp['ldap']\
+                        .get("url", ""))
             session['data'] = tmp
             return self.next_view()
         return self.render_template({"form": form})
@@ -182,12 +206,13 @@ class ProcessView(CustomView):
         with open(os.path.join(path, filename, "w")) as f:
             f.write(out)
 
-    def inject_idp(self, path, conf_dir="conf/", **kwargs):
+    def inject_vars(self, path, conf_dir, **kwargs):
         cpath = os.path.join(path, conf_dir)
-        for _ in os.listdir(cpath):
-            out = config_replacer(_, cpath, **kwargs)
-            with open(os.path.join(cpath, _), "w") as f:
-                f.write(out)
+        for root, dirnames, filenames in os.walk(cpath):
+            for filename in filenames:
+                out = config_replacer(filename, cpath, **kwargs)
+                with codecs.open(os.path.join(cpath, filename), "w", encoding='utf-8') as f:
+                    f.write(out)
 
     def generate_config(self):
         data = session.get("data", {})
@@ -203,16 +228,20 @@ class ProcessView(CustomView):
 
         # create temp directory for each service
         for k, v in data.iteritems():
-            if v: tmp_sub_dirs[k] = tempfile.mktemp(dir=temp_root_dir)
+            if v: tmp_sub_dirs[k] = tempfile.mktemp(dir=tmp_root_dir)
 
         # copy config file to temp directories and inject them
         for k, v in tmp_sub_dirs.iteritems():
             p = os.path.join(conf_path, k)
             shutil.copytree(p, v)
             if k == "idp":
-                self.inject_idp(v, data.get("idp", {}))
+                print "HERE"
+                self.inject_vars(v, "confs/", **data.get("idp", {}))
             elif k == "ldap":
-                pass # TODO
+                print "HERE"
+                self.inject_vars(v, "environment/", **data.get("ldap", {}))
+                self.inject_vars(v, "environment/", **data.get("ldap", {}))
+
 
     def execute(self):
         executable = "/usr/bin/local/docker-compose"
@@ -239,6 +268,7 @@ class ProcessView(CustomView):
         # if self.is_locked():
         #    flash("Não autorizado.")
         #    return redirect(url_for("serviceview"))
+        self.generate_config()
         return Response(self.stream_template(output=stream_with_context(self.execute())))
 
 # class SSHView(CustomView):
