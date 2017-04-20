@@ -7,6 +7,7 @@ import time
 import tempfile
 import shutil
 import codecs
+import zipfile
 
 from robot import app, babel, LANGUAGES
 
@@ -206,6 +207,13 @@ class ProcessView(CustomView):
         with open(os.path.join(path, filename, "w")) as f:
             f.write(out)
 
+    def zipdir(self, path, name):
+        ziph = zipfile.ZipFile(name, "w", zipfile.ZIP_DEFLATED)
+        for root, dirnames, filenames in os.walk(path):
+            for f in files:
+                ziph.write(os.path.join(root, f))
+        ziph.close()
+
     def inject_vars(self, path, conf_dir, **kwargs):
         cpath = os.path.join(path, conf_dir)
         for root, dirnames, filenames in os.walk(cpath):
@@ -235,13 +243,10 @@ class ProcessView(CustomView):
             p = os.path.join(conf_path, k)
             shutil.copytree(p, v)
             if k == "idp":
-                print "HERE"
                 self.inject_vars(v, "confs/", **data.get("idp", {}))
             elif k == "ldap":
-                print "HERE"
                 self.inject_vars(v, "environment/", **data.get("ldap", {}))
                 self.inject_vars(v, "environment/", **data.get("ldap", {}))
-
 
     def execute(self):
         executable = "/usr/bin/local/docker-compose"
