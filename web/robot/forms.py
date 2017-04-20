@@ -91,7 +91,7 @@ class IDPForm(NetworkForm, CountryForm, TechnicalDetails):
     store_pwd =  PasswordField(lazy_gettext(u"Senha do Store"), validators=[
         validators.DataRequired(), validators.EqualTo("sconfirm", message=lazy_gettext(u"As senhas devem coincidir."))])
     sconfirm = PasswordField(lazy_gettext(u"Confirme sua senha."))
-    wants_ldap = BooleanField(lazy_gettext(u"Instalar LDAP junto?"), validators=[validators.Required()])
+    wants_ldap = BooleanField(lazy_gettext(u"Instalar LDAP junto?"))
 
 class SPForm(Form):
     pass
