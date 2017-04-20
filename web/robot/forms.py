@@ -16,7 +16,7 @@ from wtforms.fields.html5 import EmailField
 
 class ServiceForm(Form): # TODO: Fix validation, make sure at least one if required
     ldap = BooleanField("LDAP")
-    sp = BooleanField("SP")
+    # sp = BooleanField("SP")
     idp = BooleanField("IDP")
 
 class NetworkForm(Form):
@@ -87,9 +87,17 @@ class IDPForm(NetworkForm, CountryForm, TechnicalDetails):
     #     validators.Email()])
     # technical_name = StringField(u"Nome do técnico", validators=[validators.Required()])
     install_path = StringField(lazy_gettext(u"Caminho da instalação"), validators=[validators.Required()])
+    idp_entityID = StringField(lazy_gettext(u"ID da entidade"), validators=[validators.Required()])
+    store_pwd =  PasswordField(lazy_gettext(u"Senha do Store"), validators=[
+        validators.DataRequired(), validators.EqualTo("sconfirm", message=lazy_gettext(u"As senhas devem coincidir."))])
+    sconfirm = PasswordField(lazy_gettext(u"Confirme sua senha."))
+    wants_ldap = BooleanField(lazy_gettext(u"Instalar LDAP junto?"), validators=[validators.Required()])
 
 class SPForm(Form):
     pass
+
+class OptionalLPDAPForm(Form):
+    url = StringField(lazy_gettext(u"URL LDAP"), validators=[validators.Required()])
 
 class LDAPForm(NetworkForm, CountryForm):
     url = StringField(lazy_gettext(u"URL LDAP"), validators=[validators.Required(),
